@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "382479501074",
+    "project_id": "bizmanager-12913",
+    "storage_bucket": "bizmanager-12913.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382479501074:android:b68008629a30732332d5cb",
+        "android_client_info": {
+          "package_name": "com.example.mosalisapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASHesXsdwXSQOi6ZTNNRJU__BCP8HYfBs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

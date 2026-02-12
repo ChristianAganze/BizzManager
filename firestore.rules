@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper to get user data from users collection
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // User document rules
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || getUserData().role == "OWNER");
+      allow write: if isAuthenticated() && getUserData().role == "OWNER";
+    }
+
+    // Business rules
+    match /businesses/{businessId} {
+      allow read: if isAuthenticated() && getUserData().businessId == businessId;
+      allow write: if isAuthenticated() && getUserData().role == "OWNER" && getUserData().businessId == businessId;
+    }
+
+    // Generic rule for collections associated with a business
+    match /{collection}/{docId} {
+      allow read, write: if isAuthenticated() && 
+        (collection in ["products", "sales", "clients", "debts", "expenses", "agenda"]) &&
+        getUserData().businessId == resource.data.businessId;
+        
+      allow create: if isAuthenticated() && 
+        (collection in ["products", "sales", "clients", "debts", "expenses", "agenda"]) &&
+        getUserData().businessId == request.resource.data.businessId;
+    }
+  }
+}

@@ -7,18 +7,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.mosalisapp.ui.screens.*
-import com.example.mosalisapp.ui.screens.auth.*
-import com.example.mosalisapp.ui.screens.company.CreateCompanyScreen
-import com.example.mosalisapp.ui.screens.company.UserScreen
+import com.example.mosalisapp.ui.viewmodel.AuthViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 sealed interface AppRoute {
     object Splash : AppRoute
+    object Welcome : AppRoute
     object Login : AppRoute
     object SignUp : AppRoute
     object OwnerDashboard : AppRoute
     object WorkerDashboard : AppRoute
     object Users : AppRoute
+    object Clients : AppRoute
     object Products : AppRoute
     object Sales : AppRoute
     object AjoutSales: AppRoute
@@ -27,6 +27,8 @@ sealed interface AppRoute {
     object Agenda : AppRoute
     object Campany : AppRoute // Création d'entreprise
     object UserProfile : AppRoute
+    data class ClientDetail(val clientId: String): AppRoute
+    object AjoutClient: AppRoute
 }
 
 @Composable
@@ -42,25 +44,17 @@ fun AppNavHost(
         entryProvider = entryProvider {
 
             entry<AppRoute.Splash> {
-                SplashWelcomeScreen(
-                    onFinishSplash = {
-                        val currentUser = authViewModel.currentUser.value
-                        backStack.clear()
-                        if (currentUser != null) {
-                            if (currentUser.role == "OWNER") {
-                                // Sécurité : redirection si l'entreprise n'est pas encore créée
-                                if (currentUser.businessId.isNullOrEmpty()) {
-                                    backStack.add(AppRoute.Campany)
-                                } else {
-                                    backStack.add(AppRoute.OwnerDashboard)
-                                }
-                            } else {
-                                backStack.add(AppRoute.WorkerDashboard)
-                            }
-                        } else {
-                            backStack.add(AppRoute.Login)
-                        }
-                    }
+                SplashScreen(
+                    onNavigateToWelcome = { backStack.add(AppRoute.Welcome) },
+                    onNavigateToDashboard = { backStack.add(AppRoute.OwnerDashboard) },
+                    onNavigateToWorkerDashboard = { backStack.add(AppRoute.WorkerDashboard) }
+                )
+            }
+
+            entry<AppRoute.Welcome> {
+                WelcomeScreen(
+                    onNavigateToLogin = { backStack.add(AppRoute.Login) },
+                    onNavigateToSignUp = { backStack.add(AppRoute.SignUp) }
                 )
             }
 
@@ -69,7 +63,7 @@ fun AppNavHost(
                     onNavigateToSignUp = { backStack.add(AppRoute.SignUp) },
                     onLoginSuccess = { user ->
                         backStack.clear()
-                        if (user?.role == "OWNER") {
+                        if (user?.role?.name == "OWNER") {
                             if (user.businessId.isNullOrEmpty()) {
                                 backStack.add(AppRoute.Campany)
                             } else {
@@ -83,9 +77,9 @@ fun AppNavHost(
             }
 
             entry<AppRoute.SignUp> {
-                SignUpScreen(
+                RegisterScreen(
                     onNavigateToLogin = { backStack.removeLastOrNull() },
-                    onSignUpSuccess = {
+                    onRegisterSuccess = {
                         backStack.clear()
                         backStack.add(AppRoute.Campany)
                     }
@@ -93,8 +87,8 @@ fun AppNavHost(
             }
 
             entry<AppRoute.Campany> {
-                CreateCompanyScreen(
-                    onSuccess = {
+                BusinessRegistrationScreen(
+                    onRegistrationSuccess = {
                         backStack.clear()
                         backStack.add(AppRoute.OwnerDashboard)
                     }
@@ -103,25 +97,16 @@ fun AppNavHost(
 
             entry<AppRoute.OwnerDashboard> {
                 OwnerDashboardScreen(
-                    onNavigateToUsers = { backStack.add(AppRoute.Users) },
-                    onNavigateToProducts = { backStack.add(AppRoute.Products) },
-                    onNavigateToSales = { backStack.add(AppRoute.Sales) },
-                    onNavigateToExpenses = { backStack.add(AppRoute.Expenses) },
-                    onNavigateToDebts = { backStack.add(AppRoute.Debts) },
-                    onNavigateToAgenda = { backStack.add(AppRoute.Agenda) },
-                    onNavigateToProfile = { backStack.add(AppRoute.UserProfile) },
-                    onLogout = {
-                        authViewModel.logout()
-                        backStack.clear()
-                        backStack.add(AppRoute.Login)
-                    }
+                    onNavigateToWorkerList = { backStack.add(AppRoute.Users) },
+                    onNavigateToClientList = { backStack.add(AppRoute.Clients) }
                 )
             }
 
             entry<AppRoute.WorkerDashboard> {
                 WorkerDashboardScreen(
                     onNavigateToSales = { backStack.add(AppRoute.Sales) },
-                    onNavigateToProducts = { backStack.add(AppRoute.Products) },
+                    onNavigateToExpenses = { backStack.add(AppRoute.Expenses) },
+                    onNavigateToDebts = { backStack.add(AppRoute.Debts) },
                     onNavigateToProfile = { backStack.add(AppRoute.UserProfile) },
                     onLogout = {
                         authViewModel.logout()
@@ -132,14 +117,24 @@ fun AppNavHost(
             }
 
             entry<AppRoute.Users> {
-                UserScreen(onNavigateBack = { backStack.removeLastOrNull() })
+                WorkerListScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToAddWorker = { /* Logique d'ajout si besoin */ }
+                )
+            }
+
+            entry<AppRoute.Clients> {
+                ClientListScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToAddClient = { backStack.add(AppRoute.AjoutClient) },
+                    onNavigateToClientDetail = { clientId ->
+                        backStack.add(AppRoute.ClientDetail(clientId))
+                    }
+                )
             }
 
             entry<AppRoute.Products> {
-                ProductsScreen(
-                    onNavigateBack = {
-                        backStack.removeLastOrNull()
-                })
+                ProductsScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
 
             entry<AppRoute.Sales> {
@@ -150,12 +145,13 @@ fun AppNavHost(
             }
 
             entry<AppRoute.Expenses> {
-                ExpensesScreen(onNavigateBack = { backStack.removeLastOrNull() })
+                ExpenseFormScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
 
             entry<AppRoute.Debts> {
-                DebtsScreen(onNavigateBack = { backStack.removeLastOrNull() })
+                DebtFormScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
+
             entry<AppRoute.AjoutSales> {
                 AddSaleScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
@@ -173,6 +169,17 @@ fun AppNavHost(
                         backStack.add(AppRoute.Login)
                     }
                 )
+            }
+
+            entry<AppRoute.ClientDetail> { entry ->
+                ClientDetailScreen(
+                    clientId = entry.clientId,
+                    onNavigateBack = { backStack.removeLastOrNull() }
+                )
+            }
+
+            entry<AppRoute.AjoutClient> {
+                AddClientScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
         }
     )

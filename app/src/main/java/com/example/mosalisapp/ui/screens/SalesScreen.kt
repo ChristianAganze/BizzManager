@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mosalisapp.domain.model.Sale
 import com.example.mosalisapp.ui.viewmodel.SaleViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
@@ -70,7 +71,7 @@ fun SalesScreen(
 
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun SaleHistoryCard(sale: com.example.mosalisapp.domain.model.Sale) {
+fun SaleHistoryCard(sale: Sale) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),

@@ -1,16 +1,12 @@
 package com.example.mosalisapp.domain.repository
 
 import com.example.mosalisapp.domain.model.User
+import kotlinx.coroutines.flow.Flow
+
 interface AuthRepository {
-    suspend fun login(email: String, pass: String): Result<User>
-    suspend fun signUpOwner(email: String, pass: String, userName: String): Result<String>
-
-    // Fonction pour l'Owner afin de créer un employé
-    suspend fun createWorker(email: String, pass: String, name: String, businessId: String): Result<Unit>
-
-    // Pour la gestion de la liste des employés
-    suspend fun getWorkersByBusiness(businessId: String): List<User>
-
-    fun getCurrentUser(): User?
-    fun logout(): Result<Unit>
+    fun getCurrentUser(): Flow<User?>
+    suspend fun login(email: String, password: String): Result<Unit>
+    suspend fun register(name: String, email: String, password: String): Result<User>
+    suspend fun registerWorker(name: String, email: String, password: String, businessId: String): Result<User>
+    suspend fun logout()
 }

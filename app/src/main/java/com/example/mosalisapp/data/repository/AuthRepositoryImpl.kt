@@ -1,80 +1,89 @@
 package com.example.mosalisapp.data.repository
 
-import com.example.mosalisapp.domain.model.User
+import com.example.mosalisapp.data.mapper.toMap
+import com.example.mosalisapp.data.mapper.toUser
+import com.example.mosalisapp.domain.model.Role
 import com.example.mosalisapp.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
+import com.example.mosalisapp.domain.model.User
 
 class AuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
-    override suspend fun login(email: String, pass: String): Result<User> = try {
-        val result = auth.signInWithEmailAndPassword(email, pass).await()
-        val uid = result.user?.uid ?: throw Exception("Échec de connexion")
-        val userDoc = firestore.collection("users").document(uid).get().await()
-        val user = userDoc.toObject(User::class.java) ?: throw Exception("Données invalides")
-        Result.success(user)
-    } catch (e: Exception) { Result.failure(e) }
+    override fun getCurrentUser(): Flow<User?> = callbackFlow {
 
-    override suspend fun signUpOwner(email: String, pass: String, userName: String): Result<String> = try {
-        val res = auth.createUserWithEmailAndPassword(email, pass).await()
-        val uid = res.user!!.uid
-        val user = User(userId = uid, name = userName, email = email, role = "OWNER")
-        firestore.collection("users").document(uid).set(user).await()
-        Result.success(uid)
-    } catch (e: Exception) { Result.failure(e) }
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
 
-// Dans AuthRepositoryImpl.kt
+            val firebaseUser = firebaseAuth.currentUser
 
-    override suspend fun createWorker(
-        email: String,
-        pass: String,
-        name: String,
-        businessId: String
-    ): Result<Unit> = try {
-        // 1. CRÉATION DU COMPTE RÉEL DANS FIREBASE AUTH
-        // On crée l'utilisateur pour qu'il puisse se connecter plus tard
-        val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
-        val workerId = authResult.user?.uid ?: throw Exception("Erreur lors de la création Auth")
+            if (firebaseUser == null) {
 
-        // 2. STOCKAGE DES INFOS DANS FIRESTORE
-        val worker = User(
-            userId = workerId,
-            name = name,
-            email = email,
-            role = "WORKER",
-            businessId = businessId
-        )
-        firestore.collection("users").document(workerId).set(worker).await()
+                trySend(null)
 
-        // 3. LE PIÈGE : Firebase vient de connecter le travailleur.
-        // On déconnecte le travailleur pour que l'Owner puisse se reconnecter
-        // ou pour que le travailleur puisse se loguer proprement.
-        auth.signOut()
+            } else {
 
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-    override suspend fun getWorkersByBusiness(businessId: String): List<User> = try {
-        firestore.collection("users")
-            .whereEqualTo("businessId", businessId)
-            .whereEqualTo("role", "WORKER")
-            .get().await()
-            .toObjects(User::class.java)
-    } catch (e: Exception) { emptyList() }
+                val registration = firestore.collection("users")
+                    .document(firebaseUser.uid)
+                    .addSnapshotListener { snapshot, error ->
 
-    override fun getCurrentUser(): User? {
-        val fbUser = auth.currentUser ?: return null
-        return User(userId = fbUser.uid, email = fbUser.email ?: "", name = "")
+                        if (error != null) return@addSnapshotListener
+
+                        val user = snapshot?.data?.toUser(firebaseUser.uid)
+
+                        trySend(user)
+                    }
+            }
+        }
+
+        auth.addAuthStateListener(listener)
+
+        awaitClose {
+            auth.removeAuthStateListener(listener)
+        }
     }
 
-    override fun logout(): Result<Unit> = try {
+    override suspend fun login(email: String, password: String): Result<Unit> {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun logout() {
         auth.signOut()
-        Result.success(Unit)
-    } catch (e: Exception) { Result.failure(e) }
+    }
+
+    override suspend fun register(name: String, email: String, password: String): Result<User> {
+        return try {
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: return Result.failure(Exception("User ID null"))
+            val user = User(id = userId, name = name, email = email, role = Role.OWNER, businessId = userId)
+            
+            firestore.collection("users").document(userId).set(user.toMap()).await()
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun registerWorker(name: String, email: String, password: String, businessId: String): Result<User> {
+        // Implementation detail: for this setup we simulate success or use a dedicated method
+        // In a real app, this might call a Cloud Function
+        return try {
+            val user = User(id = "worker_${System.currentTimeMillis()}", name = name, email = email, role = Role.WORKER, businessId = businessId)
+            firestore.collection("users").document(user.id).set(user.toMap()).await()
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

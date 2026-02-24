@@ -82,6 +82,10 @@ dependencies {
 
     implementation(libs.coil.compose)
 
+    // Vico Charts
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.22")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.22")
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.22")
 
 
   /*  implementation(libs.adaptive)

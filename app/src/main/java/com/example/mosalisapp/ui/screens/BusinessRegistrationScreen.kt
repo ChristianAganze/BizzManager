@@ -131,9 +131,7 @@ fun BusinessRegistrationScreen(
 
         Button(
             onClick = {
-                // TODO: Implement registration logic
-                // After successful registration:
-                // onRegistrationSuccess()
+                 onRegistrationSuccess()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

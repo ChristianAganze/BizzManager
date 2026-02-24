@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mosalisapp.domain.model.Product
 import com.example.mosalisapp.domain.repository.ProductRepository
-import com.example.mosalisapp.ui.screens.auth.AuthViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -30,7 +30,7 @@ class ProductViewModel(
         } else {
             products.filter { it.name.contains(query, ignoreCase = true) }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Companion.WhileSubscribed(5000), emptyList())
 
 
     private val _isLoading = MutableStateFlow(false)
@@ -45,7 +45,7 @@ class ProductViewModel(
         val businessId = authViewModel.currentUser.value?.businessId ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            _products.value = repository.getProducts(businessId)
+            _products.value = repository.getProducts(businessId).first()
             _isLoading.value = false
         }
     }

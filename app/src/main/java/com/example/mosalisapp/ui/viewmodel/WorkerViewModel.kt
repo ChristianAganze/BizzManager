@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 class WorkerViewModel(
     private val createSaleUseCase: CreateSaleUseCase,
     private val createDebtUseCase: CreateDebtUseCase,
+    private val createExpenseUseCase: CreateExpenseUseCase,
     private val createClientUseCase: CreateClientUseCase,
     private val getProductsUseCase: GetProductsUseCase,
     private val authViewModel: AuthViewModel
@@ -70,8 +71,12 @@ class WorkerViewModel(
                 amount = amount,
                 createdBy = currentUser.id
             )
-            // Simulating success for now
-            _uiState.value = WorkerUiState.Success("Dépense créée avec succès")
+            val result = createExpenseUseCase(expense)
+            if (result.isSuccess) {
+                _uiState.value = WorkerUiState.Success("Dépense créée avec succès")
+            } else {
+                _uiState.value = WorkerUiState.Error(result.exceptionOrNull()?.message ?: "Erreur lors de la création")
+            }
         }
     }
 }

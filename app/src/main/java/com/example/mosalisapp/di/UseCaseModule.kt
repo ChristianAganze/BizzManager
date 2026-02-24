@@ -11,5 +11,6 @@ val useCaseModule = module {
     factory { CreateClientUseCase(get()) }
     factory { GetProductsUseCase(get()) }
     factory { GetExpensesUseCase(get()) }
+    factory { CreateExpenseUseCase(get()) }
     factory { GetAgendaEventsUseCase(get()) }
 }

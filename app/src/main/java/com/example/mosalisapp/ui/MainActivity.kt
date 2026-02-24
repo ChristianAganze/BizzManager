@@ -11,36 +11,22 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.mosalisapp.ui.theme.MosalisAppTheme
+import com.example.mosalisapp.ui.viewmodel.ThemeViewModel
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MosalisAppTheme {
-                /*
-                EnregistreScreen(
-                    onSuccess = {
-                        println("Inscription réussie")
-                    },
-                  onBack = {
-                      println("Retour")
-
-                  }
-                )
-
-                ConnexionScreen(
-                    onSuccess = {
-                        println("Connexion réussie")
-                    },
-                    onNavigateToRegister = {
-
-                    }
-                )
-*/
-            AppMosali()
-
+            val themeViewModel: ThemeViewModel = koinViewModel()
+            val appTheme by themeViewModel.theme.collectAsState()
+            
+            MosalisAppTheme(appTheme = appTheme) {
+                AppMosali()
             }
         }
     }
@@ -50,7 +36,7 @@ class MainActivity : ComponentActivity() {
 fun AppMosali(){
     val backStack = remember { mutableStateListOf<AppRoute>(AppRoute.Splash) }
     BackHandler(enabled = backStack.size > 1) {
-        backStack.removeFirstOrNull()
+        backStack.removeLastOrNull()
     }
     AppNavHost(
         backStack = backStack,

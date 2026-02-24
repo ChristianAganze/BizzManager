@@ -2,10 +2,18 @@ package com.example.mosalisapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val IndigoMidnight = Color(0xFF0D1117)
+val DeepIndigo = Color(0xFF161B22)
+val AntigravityCyan = Color(0xFF00D2FF)
+val AntigravityBlue = Color(0xFF3A7BD5)
+val GlowCyan = Color(0x3300D2FF)
+val SlateGrey = Color(0xFF8B949E)
+val GlassWhite = Color(0x1AFFFFFF)
+val MintSuccess = Color(0xFF2ECC71)
+val CoralError = Color(0xFFE74C3C)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// New Light Mode Palette
+val GoldPremium = Color(0xFFD4AF37)
+val AntigravityBeige = Color(0xFFF5F5DC)
+val SoftBeige = Color(0xFFFDFBF7)
+val OnGoldBeige = Color(0xFFF5F5DC)

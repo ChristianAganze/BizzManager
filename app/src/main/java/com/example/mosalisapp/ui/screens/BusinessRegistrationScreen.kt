@@ -11,11 +11,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.mosalisapp.ui.viewmodel.BusinessRegistrationState
+import com.example.mosalisapp.ui.viewmodel.BusinessViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessRegistrationScreen(
-    onRegistrationSuccess: () -> Unit
+    onRegistrationSuccess: () -> Unit,
+    viewModel: BusinessViewModel = koinViewModel()
 ) {
     var businessName by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -23,10 +27,15 @@ fun BusinessRegistrationScreen(
     val currencies = listOf("CDF", "USD")
     var selectedCurrency by remember { mutableStateOf(currencies[0]) }
     var phoneBusiness by remember { mutableStateOf("") }
-    var ownerName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var phoneOwner by remember { mutableStateOf("") }
+
+    val registrationState by viewModel.registrationState.collectAsState()
+
+    LaunchedEffect(registrationState) {
+        if (registrationState is BusinessRegistrationState.Success) {
+            onRegistrationSuccess()
+            viewModel.resetState()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -35,7 +44,7 @@ fun BusinessRegistrationScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Créer votre Business et compte Owner", style = MaterialTheme.typography.headlineSmall)
+        Text("Détails de votre Business", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -49,19 +58,19 @@ fun BusinessRegistrationScreen(
         OutlinedTextField(
             value = category,
             onValueChange = { category = it },
-            label = { Text("Catégorie") },
+            label = { Text("Catégorie (ex: Boutique, Restaurant)") },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = address,
             onValueChange = { address = it },
-            label = { Text("Adresse") },
+            label = { Text("Adresse Physique") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Column(Modifier.selectableGroup()) {
-            Text("Devise :")
+            Text("Devise de gestion :")
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
@@ -79,7 +88,7 @@ fun BusinessRegistrationScreen(
                     ) {
                         RadioButton(
                             selected = (text == selectedCurrency),
-                            onClick = null // null recommended for accessibility with screenreaders
+                            onClick = null
                         )
                         Text(
                             text = text,
@@ -94,48 +103,38 @@ fun BusinessRegistrationScreen(
         OutlinedTextField(
             value = phoneBusiness,
             onValueChange = { phoneBusiness = it },
-            label = { Text("Téléphone Business") },
+            label = { Text("Téléphone du Business") },
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = ownerName,
-            onValueChange = { ownerName = it },
-            label = { Text("Nom du Propriétaire") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email du Propriétaire") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (registrationState is BusinessRegistrationState.Loading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    viewModel.registerBusiness(
+                        name = businessName,
+                        category = category,
+                        address = address,
+                        currency = selectedCurrency,
+                        phone = phoneBusiness
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = businessName.isNotBlank()
+            ) {
+                Text("Finaliser la création")
+            }
+        }
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Mot de passe") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = phoneOwner,
-            onValueChange = { phoneOwner = it },
-            label = { Text("Téléphone du Propriétaire") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                 onRegistrationSuccess()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Créer le Business et le Compte")
+        if (registrationState is BusinessRegistrationState.Error) {
+            Text(
+                text = (registrationState as BusinessRegistrationState.Error).message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

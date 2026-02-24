@@ -49,9 +49,22 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun login(email: String, password: String): Result<Unit> {
+    override suspend fun login(email: String, password: String): Result<User?> {
         return try {
-            auth.signInWithEmailAndPassword(email, password).await()
+            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: return Result.failure(Exception("User not found"))
+            val snapshot = firestore.collection("users").document(userId).get().await()
+            val user = snapshot.data?.toUser(userId)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateBusinessId(userId: String, businessId: String): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId)
+                .update("businessId", businessId).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

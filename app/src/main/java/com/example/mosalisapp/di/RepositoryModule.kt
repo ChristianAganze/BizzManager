@@ -16,15 +16,17 @@ import com.example.mosalisapp.domain.repository.DebtRepository
 import com.example.mosalisapp.domain.repository.ExpenseRepository
 import com.example.mosalisapp.domain.repository.ProductRepository
 import com.example.mosalisapp.domain.repository.SaleRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.dsl.module
 
 val repositoryModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
-    single<BusinessRepository> { BusinessRepositoryImpl(get()) }
-    single<ProductRepository> { ProductRepositoryImpl(get()) }
-    single<SaleRepository> { SaleRepositoryImpl(get()) }
-    single<ClientRepository> { ClientRepositoryImpl(get()) }
-    single<DebtRepository> { DebtRepositoryImpl(get()) }
-    single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
-    single<AgendaRepository> { AgendaRepositoryImpl(get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get<FirebaseAuth>(), get<FirebaseFirestore>()) }
+    single<BusinessRepository> { BusinessRepositoryImpl(get<FirebaseFirestore>()) }
+    single<ProductRepository> { ProductRepositoryImpl(get<FirebaseFirestore>()) }
+    single<SaleRepository> { SaleRepositoryImpl(get<FirebaseFirestore>()) }
+    single<ClientRepository> { ClientRepositoryImpl(get<FirebaseFirestore>()) }
+    single<DebtRepository> { DebtRepositoryImpl(get<FirebaseFirestore>()) }
+    single<ExpenseRepository> { ExpenseRepositoryImpl(get<FirebaseFirestore>()) }
+    single<AgendaRepository> { AgendaRepositoryImpl(get<FirebaseFirestore>()) }
 }

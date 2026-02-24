@@ -6,7 +6,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.example.mosalisapp.ui.screens.*
+import com.example.mosalisapp.ui.screens.AddClientScreen
+import com.example.mosalisapp.ui.screens.AddSaleScreen
+import com.example.mosalisapp.ui.screens.AgendaScreen
+import com.example.mosalisapp.ui.screens.BusinessRegistrationScreen
+import com.example.mosalisapp.ui.screens.ClientDetailScreen
+import com.example.mosalisapp.ui.screens.ClientListScreen
+import com.example.mosalisapp.ui.screens.DebtFormScreen
+import com.example.mosalisapp.ui.screens.ExpenseFormScreen
+import com.example.mosalisapp.ui.screens.LoginScreen
+import com.example.mosalisapp.ui.screens.OwnerDashboardScreen
+import com.example.mosalisapp.ui.screens.ProductsScreen
+import com.example.mosalisapp.ui.screens.RegisterScreen
+import com.example.mosalisapp.ui.screens.SalesScreen
+import com.example.mosalisapp.ui.screens.SplashScreen
+import com.example.mosalisapp.ui.screens.UserProfileScreen
+import com.example.mosalisapp.ui.screens.WelcomeScreen
+import com.example.mosalisapp.ui.screens.WorkerDashboardScreen
+import com.example.mosalisapp.ui.screens.WorkerListScreen
 import com.example.mosalisapp.ui.viewmodel.AuthViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -64,7 +81,7 @@ fun AppNavHost(
                     onLoginSuccess = { user ->
                         backStack.clear()
                         if (user?.role?.name == "OWNER") {
-                            if (user.businessId.isNullOrEmpty()) {
+                            if (user.businessId.isEmpty()) {
                                 backStack.add(AppRoute.Campany)
                             } else {
                                 backStack.add(AppRoute.OwnerDashboard)
@@ -98,7 +115,14 @@ fun AppNavHost(
             entry<AppRoute.OwnerDashboard> {
                 OwnerDashboardScreen(
                     onNavigateToWorkerList = { backStack.add(AppRoute.Users) },
-                    onNavigateToClientList = { backStack.add(AppRoute.Clients) }
+                    onNavigateToClientList = { backStack.add(AppRoute.Clients) },
+                    onNavigateToProducts = { backStack.add(AppRoute.Products) },
+                    onNavigateToProfile = { backStack.add(AppRoute.UserProfile) },
+                    onLogout = {
+                        authViewModel.logout()
+                        backStack.clear()
+                        backStack.add(AppRoute.Login)
+                    }
                 )
             }
 
@@ -107,6 +131,7 @@ fun AppNavHost(
                     onNavigateToSales = { backStack.add(AppRoute.Sales) },
                     onNavigateToExpenses = { backStack.add(AppRoute.Expenses) },
                     onNavigateToDebts = { backStack.add(AppRoute.Debts) },
+                    onNavigateToAgenda = { backStack.add(AppRoute.Agenda) },
                     onNavigateToProfile = { backStack.add(AppRoute.UserProfile) },
                     onLogout = {
                         authViewModel.logout()

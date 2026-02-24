@@ -87,13 +87,13 @@ fun SaleHistoryCard(sale: Sale) {
                     Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = sale.customerName,
+                        text = "Produit ID: ${sale.productId}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
-                    text = SimpleDateFormat("dd/MM HH:mm").format(Date(sale.timestamp)),
+                    text = SimpleDateFormat("dd/MM HH:mm").format(Date(sale.createdAt)),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
@@ -101,14 +101,11 @@ fun SaleHistoryCard(sale: Sale) {
 
             Spacer(Modifier.height(8.dp))
 
-            // Liste résumée des items
-            sale.items.forEach { item ->
-                Text(
-                    text = "• ${item.productName} (x${item.quantity})",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.DarkGray
-                )
-            }
+            Text(
+                text = "Quantité: ${sale.quantity}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray
+            )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
@@ -118,7 +115,7 @@ fun SaleHistoryCard(sale: Sale) {
             ) {
                 Text("Total", fontWeight = FontWeight.SemiBold)
                 Text(
-                    "${sale.totalAmount} ${sale.currency}",
+                    "${sale.totalAmount} $",
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 18.sp

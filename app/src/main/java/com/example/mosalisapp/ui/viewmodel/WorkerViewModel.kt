@@ -7,6 +7,7 @@ import com.example.mosalisapp.domain.model.Expense
 import com.example.mosalisapp.domain.model.Sale
 import com.example.mosalisapp.domain.usecase.CreateClientUseCase
 import com.example.mosalisapp.domain.usecase.CreateDebtUseCase
+import com.example.mosalisapp.domain.usecase.CreateExpenseUseCase // Added import
 import com.example.mosalisapp.domain.usecase.CreateSaleUseCase
 import com.example.mosalisapp.domain.usecase.GetProductsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow

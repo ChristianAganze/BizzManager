@@ -28,6 +28,16 @@ class ProductRepositoryImpl(
         awaitClose { subscription.remove() }
     }
 
+    override suspend fun getProduct(id: String): Result<Product?> {
+        return try {
+            val snapshot = firestore.collection("products").document(id).get().await()
+            val product = snapshot.data?.toProduct(snapshot.id)
+            Result.success(product)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun addProduct(product: Product): Result<String> {
         return try {
             val docRef = firestore.collection("products").document()

@@ -1,5 +1,6 @@
 package com.example.mosalisapp.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -159,7 +160,7 @@ fun OwnerDashboardScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = IndigoMidnight,
+                        containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = Color.White,
                         navigationIconContentColor = Color.White
                     )
@@ -169,6 +170,7 @@ fun OwnerDashboardScreen(
         ) { padding ->
             Box(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
                     .fillMaxSize()
                     .padding(padding)
             ) {

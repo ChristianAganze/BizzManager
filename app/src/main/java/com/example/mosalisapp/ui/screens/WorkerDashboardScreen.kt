@@ -10,13 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -59,6 +60,7 @@ import com.example.mosalisapp.ui.theme.SlateGrey
 @Composable
 fun WorkerDashboardScreen(
     onNavigateToSales: () -> Unit,
+    onNavigateToSaleH: () -> Unit,
     onNavigateToExpenses: () -> Unit,
     onNavigateToDebts: () -> Unit,
     onNavigateToProfile: () -> Unit,
@@ -77,7 +79,7 @@ fun WorkerDashboardScreen(
                 ),
                 actions = {
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White)
                     }
                 }
             )
@@ -152,61 +154,83 @@ fun WorkerDashboardScreen(
         },
         containerColor = IndigoMidnight
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                "Bonjour 👋", 
-                fontSize = 24.sp, 
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            
-            Text(
-                "Opérations rapides", 
-                fontSize = 18.sp, 
-                fontWeight = FontWeight.SemiBold,
-                color = SlateGrey
-            )
-            
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                ActionCard("Nouvelle Vente", Icons.Default.Add, AntigravityCyan, Modifier.weight(1f)) {
-                    onNavigateToSales()
-                }
-                ActionCard("Dépenses", Icons.Default.ShoppingCart, AntigravityBlue, Modifier.weight(1f)) {
-                    onNavigateToExpenses()
-                }
+            item {
+                Text(
+                    "Bonjour 👋", 
+                    fontSize = 24.sp, 
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
             
-            ActionCard("Gestion des Dettes", Icons.Default.MonetizationOn, CoralError, Modifier.fillMaxWidth()) {
-                    onNavigateToDebts()
+            item {
+                Text(
+                    "Opérations rapides", 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.SemiBold,
+                    color = SlateGrey
+                )
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ActionCard("Nouvelle Vente", Icons.Default.Add, AntigravityCyan, Modifier.weight(1f)) {
+                        onNavigateToSales()
+                    }
+                    ActionCard("Dépenses", Icons.Default.ShoppingCart, AntigravityBlue, Modifier.weight(1f)) {
+                        onNavigateToExpenses()
+                    }
+                }
+            }
+
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ActionCard("Gestion des Dettes", Icons.Default.MonetizationOn, CoralError, Modifier.fillMaxWidth()) {
+                        onNavigateToDebts()
+                    }
+
+                }
+            }
+            item {
+                ActionCard("Historique de vente", Icons.Default.ShoppingCart, AntigravityBlue, Modifier.fillMaxWidth()) {
+                    onNavigateToSaleH()
+                }
+            }
+
+
             
-            Text(
-                "Prochains événements", 
-                fontSize = 18.sp, 
-                fontWeight = FontWeight.SemiBold,
-                color = SlateGrey
-            )
+            item { Spacer(modifier = Modifier.height(8.dp)) }
             
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = DeepIndigo),
-                border = androidx.compose.foundation.BorderStroke(1.dp, GlassWhite)
-            ) {
-                Box(Modifier.padding(40.dp), contentAlignment = Alignment.Center) {
-                    Text(
-                        "Rien de prévu pour aujourd'hui", 
-                        color = SlateGrey,
-                        textAlign = TextAlign.Center
-                    )
+            item {
+                Text(
+                    "Prochains événements", 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.SemiBold,
+                    color = SlateGrey
+                )
+            }
+            
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = DeepIndigo),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassWhite)
+                ) {
+                    Box(Modifier.padding(40.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Rien de prévu pour aujourd'hui", 
+                            color = SlateGrey,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

@@ -24,7 +24,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val authState = _authState.asStateFlow()
 
     val currentUser = repository.getCurrentUser()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun login(email: String, password: String) {
         viewModelScope.launch {

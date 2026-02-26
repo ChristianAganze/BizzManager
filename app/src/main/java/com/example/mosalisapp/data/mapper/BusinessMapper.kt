@@ -18,6 +18,7 @@ fun Map<String, Any?>.toBusiness(id: String): Business {
 
 fun Business.toMap(): Map<String, Any?> {
     return mapOf(
+        "businessId" to id, // Added for generic rules compatibility
         "name" to name,
         "category" to category,
         "address" to address,

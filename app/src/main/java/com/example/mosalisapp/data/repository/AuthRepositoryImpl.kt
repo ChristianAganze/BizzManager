@@ -79,7 +79,7 @@ class AuthRepositoryImpl(
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val userId = authResult.user?.uid ?: return Result.failure(Exception("User ID null"))
-            val user = User(id = userId, name = name, email = email, role = Role.OWNER, businessId = userId)
+            val user = User(id = userId, name = name, email = email, role = Role.OWNER, businessId = "")
             
             firestore.collection("users").document(userId).set(user.toMap()).await()
             Result.success(user)
@@ -89,11 +89,31 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun registerWorker(name: String, email: String, password: String, businessId: String): Result<User> {
-        // Implementation detail: for this setup we simulate success or use a dedicated method
-        // In a real app, this might call a Cloud Function
         return try {
-            val user = User(id = "worker_${System.currentTimeMillis()}", name = name, email = email, role = Role.WORKER, businessId = businessId)
-            firestore.collection("users").document(user.id).set(user.toMap()).await()
+            // Use a secondary FirebaseApp to avoid signing out the current owner
+            val secondaryAppName = "secondary_app_${System.currentTimeMillis()}"
+            val options = auth.app.options
+            val secondaryApp = com.google.firebase.FirebaseApp.initializeApp(
+                auth.app.applicationContext,
+                options,
+                secondaryAppName
+            )
+            val secondaryAuth = FirebaseAuth.getInstance(secondaryApp)
+
+            val authResult = secondaryAuth.createUserWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: return Result.failure(Exception("Worker User ID null"))
+            
+            // Important: we don't sign out here yet because we need the token/auth to write to Firestore?
+            // Actually, the OWNER is the one writing to Firestore in this app's logic (see rules).
+            // But wait, the OWNER can write to /users/ if they are OWNER.
+            
+            // Delete the secondary app instance to clean up
+            secondaryApp.delete()
+
+            // Create user document in Firestore with the generated UID
+            val user = User(id = userId, name = name, email = email, role = Role.WORKER, businessId = businessId)
+            firestore.collection("users").document(userId).set(user.toMap()).await()
+            
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)

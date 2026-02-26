@@ -5,14 +5,15 @@ import com.example.mosalisapp.domain.repository.*
 import org.koin.dsl.module
 
 val useCaseModule = module {
-    factory { GetDashboardStatsUseCase(get<ProductRepository>(),get<SaleRepository>(), get<DebtRepository>(),get<ExpenseRepository>()  ) }
-    factory { CreateSaleUseCase(get<SaleRepository>()) }
-    factory { CreateDebtUseCase(get<DebtRepository>()) }
-    factory { GetClientsUseCase(get<ClientRepository>()) }
-    factory { CreateClientUseCase(get<ClientRepository>()) }
-    factory { GetProductsUseCase(get<ProductRepository>()) }
-    factory { GetExpensesUseCase(get<ExpenseRepository>()) }
-    factory { CreateExpenseUseCase(get<ExpenseRepository>()) }
-    factory { CreateBusinessUseCase(get<BusinessRepository>(), get<AuthRepository>()) }
-    factory { GetAgendaEventsUseCase(get<AgendaRepository>()) }
+    factory<GetDashboardStatsUseCase> { GetDashboardStatsUseCase(get(), get(), get(), get()) }
+    factory<CreateSaleUseCase> { CreateSaleUseCase(get(), get()) }
+    factory<DeleteSaleUseCase> { DeleteSaleUseCase(get(), get()) }
+    factory<CreateDebtUseCase> { CreateDebtUseCase(get()) }
+    factory<GetClientsUseCase> { GetClientsUseCase(get()) }
+    factory<CreateClientUseCase> { CreateClientUseCase(get()) }
+    factory<GetProductsUseCase> { GetProductsUseCase(get()) }
+    factory<GetExpensesUseCase> { GetExpensesUseCase(get()) }
+    factory<CreateExpenseUseCase> { CreateExpenseUseCase(get()) }
+    factory<CreateBusinessUseCase> { CreateBusinessUseCase(get(), get()) }
+    factory<GetAgendaEventsUseCase> { GetAgendaEventsUseCase(get()) }
 }

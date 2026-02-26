@@ -10,11 +10,12 @@ import com.example.mosalisapp.ui.viewmodel.BusinessViewModel
 import com.example.mosalisapp.ui.viewmodel.ThemeViewModel
 import com.example.mosalisapp.domain.repository.*
 import com.example.mosalisapp.domain.usecase.*
+import com.example.mosalisapp.ui.viewmodel.ProductViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { AuthViewModel(get<AuthRepository>()) }
+    single { AuthViewModel(get<AuthRepository>()) }
     viewModel { DashboardViewModel(get<GetDashboardStatsUseCase>(), get<AuthViewModel>()) }
     viewModel { 
         WorkerViewModel(
@@ -28,7 +29,10 @@ val viewModelModule = module {
     }
     viewModel { ClientViewModel(get<GetClientsUseCase>(), get<CreateClientUseCase>(), get<AuthViewModel>()) }
     viewModel { WorkerManagementViewModel(get<BusinessRepository>(), get<AuthRepository>(), get<AuthViewModel>()) }
-    viewModel { SaleViewModel(get<SaleRepository>(), get<AuthViewModel>()) }
+    viewModel { SaleViewModel(get<SaleRepository>(), get<DeleteSaleUseCase>(), get<AuthViewModel>()) }
     viewModel { BusinessViewModel(get<CreateBusinessUseCase>(), get<AuthViewModel>()) }
     viewModel { ThemeViewModel() }
+    viewModel { ProductViewModel(get(),get()) }
+
+
 }

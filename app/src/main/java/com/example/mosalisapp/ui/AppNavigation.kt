@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.mosalisapp.ui.screens.AddClientScreen
-import com.example.mosalisapp.ui.screens.AddSaleScreen
+import com.example.mosalisapp.ui.screens.AddWorkerScreen
 import com.example.mosalisapp.ui.screens.AgendaScreen
 import com.example.mosalisapp.ui.screens.BusinessRegistrationScreen
 import com.example.mosalisapp.ui.screens.ClientDetailScreen
@@ -16,9 +16,11 @@ import com.example.mosalisapp.ui.screens.DebtFormScreen
 import com.example.mosalisapp.ui.screens.ExpenseFormScreen
 import com.example.mosalisapp.ui.screens.LoginScreen
 import com.example.mosalisapp.ui.screens.OwnerDashboardScreen
+import com.example.mosalisapp.ui.screens.ProductFormScreen
 import com.example.mosalisapp.ui.screens.ProductsScreen
 import com.example.mosalisapp.ui.screens.RegisterScreen
-import com.example.mosalisapp.ui.screens.SalesScreen
+import com.example.mosalisapp.ui.screens.SaleScreen
+import com.example.mosalisapp.ui.screens.SalesHistoryScreen
 import com.example.mosalisapp.ui.screens.SplashScreen
 import com.example.mosalisapp.ui.screens.UserProfileScreen
 import com.example.mosalisapp.ui.screens.WelcomeScreen
@@ -38,7 +40,8 @@ sealed interface AppRoute {
     object Clients : AppRoute
     object Products : AppRoute
     object Sales : AppRoute
-    object AjoutSales: AppRoute
+    object SalesH : AppRoute
+
     object Expenses : AppRoute
     object Debts : AppRoute
     object Agenda : AppRoute
@@ -46,6 +49,8 @@ sealed interface AppRoute {
     object UserProfile : AppRoute
     data class ClientDetail(val clientId: String): AppRoute
     object AjoutClient: AppRoute
+    object AddProduct : AppRoute
+    object AddWorker : AppRoute
 }
 
 @Composable
@@ -133,6 +138,7 @@ fun AppNavHost(
                     onNavigateToDebts = { backStack.add(AppRoute.Debts) },
                     onNavigateToAgenda = { backStack.add(AppRoute.Agenda) },
                     onNavigateToProfile = { backStack.add(AppRoute.UserProfile) },
+                    onNavigateToSaleH = {backStack.add(AppRoute.SalesH)},
                     onLogout = {
                         authViewModel.logout()
                         backStack.clear()
@@ -144,7 +150,7 @@ fun AppNavHost(
             entry<AppRoute.Users> {
                 WorkerListScreen(
                     onNavigateBack = { backStack.removeLastOrNull() },
-                    onNavigateToAddWorker = { /* Logique d'ajout si besoin */ }
+                    onNavigateToAddWorker = { backStack.add(AppRoute.AddWorker) }
                 )
             }
 
@@ -159,13 +165,15 @@ fun AppNavHost(
             }
 
             entry<AppRoute.Products> {
-                ProductsScreen(onNavigateBack = { backStack.removeLastOrNull() })
+                ProductsScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToAddProduct = { backStack.add(AppRoute.AddProduct) }
+                )
             }
 
-            entry<AppRoute.Sales> {
-                SalesScreen(
+            entry<AppRoute.SalesH> {
+                SalesHistoryScreen(
                     onNavigateBack = { backStack.removeLastOrNull() },
-                    onNavigateToAddSale = { backStack.add(AppRoute.AjoutSales) }
                 )
             }
 
@@ -177,8 +185,8 @@ fun AppNavHost(
                 DebtFormScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
 
-            entry<AppRoute.AjoutSales> {
-                AddSaleScreen(onNavigateBack = { backStack.removeLastOrNull() })
+            entry<AppRoute.Sales> {
+                SaleScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
 
             entry<AppRoute.Agenda> {
@@ -205,6 +213,14 @@ fun AppNavHost(
 
             entry<AppRoute.AjoutClient> {
                 AddClientScreen(onNavigateBack = { backStack.removeLastOrNull() })
+            }
+
+            entry<AppRoute.AddProduct> {
+                ProductFormScreen(onNavigateBack = { backStack.removeLastOrNull() })
+            }
+
+            entry<AppRoute.AddWorker> {
+                AddWorkerScreen(onNavigateBack = { backStack.removeLastOrNull() })
             }
         }
     )

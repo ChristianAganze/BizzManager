@@ -30,9 +30,9 @@ class BusinessRepositoryImpl(
     }
 
     override fun getWorkers(businessId: String): Flow<List<User>> = callbackFlow {
-        val subscription = firestore.collection("businesses")
-            .document(businessId)
-            .collection("workers")
+        val subscription = firestore.collection("users")
+            .whereEqualTo("businessId", businessId)
+            .whereEqualTo("role", "WORKER")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -50,10 +50,10 @@ class BusinessRepositoryImpl(
 
     override suspend fun createBusiness(business: Business): Result<String> {
         return try {
-            val docRef = firestore.collection("businesses").document()
-            val newBusiness = business.copy(id = docRef.id)
-            docRef.set(newBusiness.toMap()).await()
-            Result.success(docRef.id)
+            val id = if (business.id.isNotEmpty()) business.id else firestore.collection("businesses").document().id
+            val newBusiness = business.copy(id = id)
+            firestore.collection("businesses").document(id).set(newBusiness.toMap()).await()
+            Result.success(id)
         } catch (e: Exception) {
             Result.failure(e)
         }

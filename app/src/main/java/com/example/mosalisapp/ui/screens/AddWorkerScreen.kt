@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +35,9 @@ fun AddWorkerScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    val isAdding by viewModel.isAddingWorker.collectAsState()
+    val error by viewModel.error.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Ajouter un Employé") })
@@ -48,15 +54,24 @@ fun AddWorkerScreen(
             BusinessTextField(value = email, onValueChange = { email = it }, label = "Email")
             BusinessTextField(value = password, onValueChange = { password = it }, label = "Mot de passe initial")
             
+            error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
             
-            BusinessButton(
-                text = "Enregistrer l'employé",
-                onClick = {
-                    viewModel.addWorker(name, email, password)
-                    onNavigateBack()
-                }
-            )
+            if (isAdding) {
+                CircularProgressIndicator()
+            } else {
+                BusinessButton(
+                    text = "Enregistrer l'employé",
+                    onClick = {
+                        viewModel.addWorker(name, email, password) {
+                            onNavigateBack()
+                        }
+                    }
+                )
+            }
         }
     }
 }

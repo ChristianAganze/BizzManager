@@ -38,4 +38,23 @@ class SaleRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateSale(sale: Sale): Result<Unit> {
+        return try {
+            firestore.collection("sales").document(sale.id)
+                .update(sale.toMap()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteSale(id: String): Result<Unit> {
+        return try {
+            firestore.collection("sales").document(id).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

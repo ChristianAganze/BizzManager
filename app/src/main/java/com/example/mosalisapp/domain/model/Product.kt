@@ -4,6 +4,7 @@ data class Product(
     val id: String = "",
     val businessId: String = "",
     val name: String = "",
+    val category: String = "",
     val price: Double = 0.0,
     val currency: String = "USD", // CDF ou USD
     val quantity: Int = 0,

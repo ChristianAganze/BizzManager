@@ -14,13 +14,15 @@ service cloud.firestore {
     // User document rules
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || getUserData().role == "OWNER");
-      allow write: if isAuthenticated() && getUserData().role == "OWNER";
+      allow create: if isAuthenticated() && (request.auth.uid == userId || getUserData().role == "OWNER");
+      allow update: if isAuthenticated() && (request.auth.uid == userId || getUserData().role == "OWNER");
     }
 
     // Business rules
     match /businesses/{businessId} {
-      allow read: if isAuthenticated() && getUserData().businessId == businessId;
-      allow write: if isAuthenticated() && getUserData().role == "OWNER" && getUserData().businessId == businessId;
+      allow read: if isAuthenticated() && (getUserData().businessId == businessId || request.auth.uid == businessId);
+      allow create: if isAuthenticated() && request.auth.uid == businessId;
+      allow update: if isAuthenticated() && (getUserData().businessId == businessId || request.auth.uid == businessId);
     }
 
     // Generic rule for collections associated with a business

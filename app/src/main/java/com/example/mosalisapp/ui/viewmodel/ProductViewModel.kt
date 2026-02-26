@@ -50,11 +50,12 @@ class ProductViewModel(
         }
     }
 
-    fun addOrUpdateProduct(name: String, price: Double, quantity: Int, currency: String, id: String? = null) {
+    fun addOrUpdateProduct(name: String, category: String, price: Double, quantity: Int, currency: String, id: String? = null) {
         val businessId = authViewModel.currentUser.value?.businessId ?: return
         val product = Product(
             id = id ?: "",
             name = name,
+            category = category,
             price = price,
             quantity = quantity,
             currency = currency,

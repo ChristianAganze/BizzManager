@@ -20,15 +20,47 @@ class WorkerManagementViewModel(
 
     val workers: StateFlow<List<User>> = businessId.flatMapLatest { id ->
         if (id.isEmpty()) flowOf(emptyList()) else businessRepository.getWorkers(id)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }
+    .catch { e -> 
+        _error.value = "Erreur lors du chargement des employés: ${e.message}"
+        emit(emptyList())
+    }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addWorker(name: String, email: String, password: String) {
+    private val _isAddingWorker = MutableStateFlow(false)
+    val isAddingWorker = _isAddingWorker.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
+    fun addWorker(name: String, email: String, password: String, onSuccess: () -> Unit) {
+        if (name.isBlank() || email.isBlank() || password.isBlank()) {
+            _error.value = "Tous les champs sont obligatoires"
+            return
+        }
+        
         viewModelScope.launch {
-            val bId = authViewModel.currentUser.value?.businessId ?: return@launch
-            // We use AuthRepository to register a worker
-            // In a real app, this might be a cloud function to avoid logging out the owner
-            // For now, we simulate or use a specific method if available
-            authRepository.registerWorker(name, email, password, bId)
+            _isAddingWorker.value = true
+            _error.value = null
+
+            // Attendre que l'utilisateur soit chargé pour avoir le businessId
+            val currentUser = authViewModel.currentUser.filterNotNull().first()
+            val bId = currentUser.businessId
+            
+            if (bId.isEmpty()) {
+                _error.value = "ID d'entreprise manquant. Veuillez vous reconnecter."
+                _isAddingWorker.value = false
+                return@launch
+            }
+            
+            val result = authRepository.registerWorker(name, email, password, bId)
+            _isAddingWorker.value = false
+            
+            if (result.isSuccess) {
+                onSuccess()
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Erreur inconnue"
+            }
         }
     }
 }
